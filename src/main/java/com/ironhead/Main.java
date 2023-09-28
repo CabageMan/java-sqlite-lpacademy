@@ -80,6 +80,23 @@ public class Main {
       System.out.println("Song Artist View Creation failed");
     }
 
+    printDivider();
+
+    List<SongArtist> viewSongInfo = datasource.queryViewSongInfo("Go Your Own Way");
+    if (viewSongInfo == null) {
+      System.out.println("Failed to load song info");
+      return;
+    } else if (viewSongInfo.isEmpty()) {
+      System.out.println("There is no song info");
+      return;
+    }
+    for (SongArtist songArtist : viewSongInfo) {
+      System.out.println("From View:\nArtist Name: " + songArtist.getArtistName() + " | " +
+              "Album Name: " + songArtist.getAlbumName() + " | " +
+              "Song Track: " + songArtist.getSongTrack()
+      );
+    }
+
     datasource.close();
   }
 

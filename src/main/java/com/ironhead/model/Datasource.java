@@ -327,4 +327,30 @@ public class Datasource {
       return false;
     }
   }
+
+  public List<SongArtist> queryViewSongInfo(String songTitle) {
+    String artistName = "artistName";
+    String albumName = "albumName";
+    String trackNumber = "trackNumber";
+    String sql = "SELECT " + ArtistColumn.NAME.columnName() + " AS " + artistName + ", " +
+            SongsColumn.ALBUM.columnName() + " AS " + albumName + ", " +
+            SongsColumn.TRACK.columnName() + " AS " + trackNumber + " FROM " + TABLE_ARTIST_SONG_VIEW +
+            " WHERE " + SongsColumn.TITLE.columnName() + " = " + " '" + songTitle + "'";
+    List<SongArtist> songArtists = new ArrayList<>();
+    try (Statement statement = connection.createStatement()) {
+      ResultSet results = statement.executeQuery(sql);
+      while (results.next()) {
+        SongArtist songArtist = new SongArtist(
+                results.getString(artistName),
+                results.getString(albumName),
+                results.getInt(trackNumber)
+        );
+        songArtists.add(songArtist);
+      }
+      return  songArtists;
+    } catch (SQLException error) {
+      System.out.println("Query queryViewSongInfo failed: " + error.getMessage());
+      return null;
+    }
+  }
 }
