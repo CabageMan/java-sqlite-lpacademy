@@ -27,6 +27,8 @@ public class Main {
       System.out.println("Artist ID: " + artist.getId() + ", Artist Name: " + artist.getName());
     }
 
+    printDivider();
+
     // Albums
     List<Album> albums = datasource.queryAlbums(Datasource.SortOrder.BY_ASC);
     if (albums == null) {
@@ -40,10 +42,14 @@ public class Main {
               ", Album Artist: " + album.getArtistId());
     }
 
+    printDivider();
+
     List<String> albumsNamesForArtist = datasource.queryAlbumsForArtist("Iron Maiden", Datasource.SortOrder.BY_DESC);
     for (String albumName : albumsNamesForArtist) {
-      System.out.println("Name: " + albumName);
+      System.out.println("Album Name: " + albumName);
     }
+
+    printDivider();
 
     List<SongArtist> songArtists = datasource.queryArtistsForSong("Go Your Own Way", Datasource.SortOrder.BY_ASC);
     if (songArtists == null) {
@@ -56,8 +62,28 @@ public class Main {
               " Song track: " + songArtist.getSongTrack());
     }
 
+    printDivider();
+
     datasource.querySongsMetadata();
 
+    printDivider();
+
+    System.out.println("Number of songs: " + datasource.getCount(Datasource.TABLE_SONGS));
+    System.out.println("Number of albums: " + datasource.getCount(Datasource.TABLE_ALBUMS));
+    System.out.println("Number of artists: " + datasource.getCount(Datasource.TABLE_ARTISTS));
+
+    printDivider();
+
+    if (datasource.createViewForSongArtists()) {
+      System.out.println("Song Artist View Created Successfully");
+    } else {
+      System.out.println("Song Artist View Creation failed");
+    }
+
     datasource.close();
+  }
+
+  private static void printDivider() {
+    System.out.println("-----------------------------------------------------");
   }
 }

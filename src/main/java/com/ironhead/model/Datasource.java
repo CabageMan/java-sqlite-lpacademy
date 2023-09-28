@@ -41,7 +41,7 @@ public class Datasource {
         case NAME: return 2;
         case ARTIST: return 3;
       }
-      return 0;
+      return -1;
     }
   }
 
@@ -63,7 +63,7 @@ public class Datasource {
         case ID: return 1;
         case NAME: return 2;
       }
-      return 0;
+      return -1;
     }
   }
 
@@ -89,7 +89,7 @@ public class Datasource {
         case TITLE: return 3;
         case ALBUM: return 4;
       }
-      return 0;
+      return -1;
     }
   }
 
@@ -103,9 +103,24 @@ public class Datasource {
         case ALBUM_NAME: return 2;
         case SONG_TRACK: return 3;
       }
-      return 0;
+      return -1;
     }
   }
+
+  // Artists list View
+  public static final String TABLE_ARTIST_SONG_VIEW = "artist_list";
+  public static final String CREATE_ARTIST_FOR_SONG_VIEW = "CREATE VIEW IF NOT EXISTS " +
+   TABLE_ARTIST_SONG_VIEW + " AS SELECT " + TABLE_ARTISTS + "." + ArtistColumn.NAME.columnName() + ", " +
+   TABLE_ALBUMS + "." + AlbumColumn.NAME.columnName() + " AS " + SongsColumn.ALBUM.columnName() + ", " +
+          TABLE_SONGS + "." + SongsColumn.TRACK.columnName() + ", " + TABLE_SONGS + "." +
+          SongsColumn.TITLE.columnName() + " FROM " + TABLE_SONGS +
+          " INNER JOIN " + TABLE_ALBUMS + " ON " + TABLE_SONGS + "." + SongsColumn.ALBUM.columnName() +
+          " = " + TABLE_ALBUMS + "." + AlbumColumn.ID.columnName() +
+          " INNER JOIN " + TABLE_ARTISTS + " ON " + TABLE_ALBUMS + "." + AlbumColumn.ARTIST + " = " +
+          TABLE_ARTISTS + "." + ArtistColumn.ID.columnName() +
+          " ORDER BY " + TABLE_ARTISTS + "." + ArtistColumn.NAME.columnName() + ", " +
+          TABLE_ALBUMS + "." + AlbumColumn.NAME.columnName() + ", " +
+          TABLE_SONGS + "." + SongsColumn.TRACK.columnName();
 
   private Connection connection;
 
@@ -187,6 +202,7 @@ public class Datasource {
     stringBuilder.append(TABLE_ALBUMS);
     stringBuilder.append(".");
     stringBuilder.append(AlbumColumn.NAME.columnName());
+    stringBuilder.append(" AS albumName");
     stringBuilder.append(" FROM ");
     stringBuilder.append(TABLE_ALBUMS);
     stringBuilder.append(" INNER JOIN ");
@@ -223,8 +239,7 @@ public class Datasource {
     ) {
        List<String> albumsNames = new ArrayList<>();
        while (results.next()) {
-//         albumsNames.add(results.getString(AlbumColumn.NAME.columnIndex()));
-         albumsNames.add(results.getString(1)); // Different numeration. It's shouldn't been hardcoded.
+         albumsNames.add(results.getString("albumName"));
        }
        return albumsNames;
     } catch (SQLException error) {
@@ -287,6 +302,29 @@ public class Datasource {
       }
     } catch (SQLException error) {
       System.out.println("Query querySongsMetadata failed: " + error.getMessage());
+    }
+  }
+
+  public int getCount(String tableName) {
+    String sql = "SELECT COUNT(*) AS count FROM " + tableName;
+    try (Statement statement = connection.createStatement();
+         ResultSet results = statement.executeQuery(sql)
+    ) {
+      int count = results.getInt("count");
+      return count;
+    } catch (SQLException error) {
+      System.out.println("Query getCount failed: " + error.getMessage());
+      return -1;
+    }
+  }
+
+  public boolean createViewForSongArtists() {
+    try (Statement statement = connection.createStatement()) {
+      statement.execute(CREATE_ARTIST_FOR_SONG_VIEW);
+      return true;
+    } catch (SQLException error) {
+      System.out.println("Query createViewForSongArtists failed: " + error.getMessage());
+      return false;
     }
   }
 }
