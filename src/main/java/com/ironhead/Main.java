@@ -6,6 +6,7 @@ import com.ironhead.model.Datasource;
 import com.ironhead.model.SongArtist;
 
 import java.util.List;
+import java.util.Scanner;
 
 public class Main {
   public static void main(String[] args) {
@@ -82,7 +83,12 @@ public class Main {
 
     printDivider();
 
-    List<SongArtist> viewSongInfo = datasource.queryViewSongInfo("Go Your Own Way");
+    // Checking for SQL injection.
+    Scanner scanner = new Scanner(System.in);
+    System.out.println("Enter a song title: ");
+    String title = scanner.nextLine();
+
+    List<SongArtist> viewSongInfo = datasource.queryViewSongInfo(title);
     if (viewSongInfo == null) {
       System.out.println("Failed to load song info");
       return;

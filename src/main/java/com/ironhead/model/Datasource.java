@@ -14,32 +14,42 @@ public class Datasource {
     NONE, BY_ASC, BY_DESC;
 
     String value() {
-     switch (this) {
-       case BY_ASC: return "ASC";
-       case BY_DESC: return "DESC";
-     }
-     return null;
+      switch (this) {
+        case BY_ASC:
+          return "ASC";
+        case BY_DESC:
+          return "DESC";
+      }
+      return null;
     }
   }
 
   // Albums
   public static final String TABLE_ALBUMS = "albums";
+
   public enum AlbumColumn {
     ID, NAME, ARTIST;
+
     String columnName() {
       switch (this) {
-        case ID: return "_id";
-        case NAME: return "name";
-        case ARTIST: return "artist";
+        case ID:
+          return "_id";
+        case NAME:
+          return "name";
+        case ARTIST:
+          return "artist";
       }
       return null;
     }
 
     int columnIndex() {
       switch (this) {
-        case ID: return 1;
-        case NAME: return 2;
-        case ARTIST: return 3;
+        case ID:
+          return 1;
+        case NAME:
+          return 2;
+        case ARTIST:
+          return 3;
       }
       return -1;
     }
@@ -50,18 +60,23 @@ public class Datasource {
 
   public enum ArtistColumn {
     ID, NAME;
+
     String columnName() {
       switch (this) {
-        case ID: return "_id";
-        case NAME: return "name";
+        case ID:
+          return "_id";
+        case NAME:
+          return "name";
       }
       return null;
     }
 
     int columnIndex() {
       switch (this) {
-        case ID: return 1;
-        case NAME: return 2;
+        case ID:
+          return 1;
+        case NAME:
+          return 2;
       }
       return -1;
     }
@@ -72,22 +87,31 @@ public class Datasource {
 
   public enum SongsColumn {
     ID, TRACK, TITLE, ALBUM;
+
     String columnName() {
       switch (this) {
-        case ID: return "_id";
-        case TRACK: return "track";
-        case TITLE: return "title";
-        case ALBUM: return "album";
+        case ID:
+          return "_id";
+        case TRACK:
+          return "track";
+        case TITLE:
+          return "title";
+        case ALBUM:
+          return "album";
       }
       return null;
     }
 
     int columnIndex() {
       switch (this) {
-        case ID: return 1;
-        case TRACK: return 2;
-        case TITLE: return 3;
-        case ALBUM: return 4;
+        case ID:
+          return 1;
+        case TRACK:
+          return 2;
+        case TITLE:
+          return 3;
+        case ALBUM:
+          return 4;
       }
       return -1;
     }
@@ -95,13 +119,32 @@ public class Datasource {
 
   // Song Artists
   public enum SongArtistColumn {
-    ARTIST_NAME, ALBUM_NAME, SONG_TRACK;
+    ARTIST_NAME, ALBUM_NAME, SONG_TRACK, SONG_TITLE;
+
+    String columnName() {
+      switch (this) {
+        case ARTIST_NAME:
+          return "artistName";
+        case ALBUM_NAME:
+          return "albumName";
+        case SONG_TRACK:
+          return "songTrack";
+        case SONG_TITLE:
+          return "songTitle";
+      }
+      return null;
+    }
 
     int columnIndex() {
       switch (this) {
-        case ARTIST_NAME: return 1;
-        case ALBUM_NAME: return 2;
-        case SONG_TRACK: return 3;
+        case ARTIST_NAME:
+          return 1;
+        case ALBUM_NAME:
+          return 2;
+        case SONG_TRACK:
+          return 3;
+        case SONG_TITLE:
+          return 4;
       }
       return -1;
     }
@@ -110,10 +153,11 @@ public class Datasource {
   // Artists list View
   public static final String TABLE_ARTIST_SONG_VIEW = "artist_list";
   public static final String CREATE_ARTIST_FOR_SONG_VIEW = "CREATE VIEW IF NOT EXISTS " +
-   TABLE_ARTIST_SONG_VIEW + " AS SELECT " + TABLE_ARTISTS + "." + ArtistColumn.NAME.columnName() + ", " +
-   TABLE_ALBUMS + "." + AlbumColumn.NAME.columnName() + " AS " + SongsColumn.ALBUM.columnName() + ", " +
-          TABLE_SONGS + "." + SongsColumn.TRACK.columnName() + ", " + TABLE_SONGS + "." +
-          SongsColumn.TITLE.columnName() + " FROM " + TABLE_SONGS +
+          TABLE_ARTIST_SONG_VIEW + " AS SELECT " +
+          TABLE_ARTISTS + "." + ArtistColumn.NAME.columnName() + " AS " + SongArtistColumn.ARTIST_NAME.columnName() + ", " +
+          TABLE_ALBUMS + "." + AlbumColumn.NAME.columnName() + " AS " + SongArtistColumn.ALBUM_NAME.columnName() + ", " +
+          TABLE_SONGS + "." + SongsColumn.TRACK.columnName() + " AS " + SongArtistColumn.SONG_TRACK.columnName() + ", " +
+          TABLE_SONGS + "." + SongsColumn.TITLE.columnName() + " AS " + SongArtistColumn.SONG_TITLE.columnName() + " FROM " + TABLE_SONGS +
           " INNER JOIN " + TABLE_ALBUMS + " ON " + TABLE_SONGS + "." + SongsColumn.ALBUM.columnName() +
           " = " + TABLE_ALBUMS + "." + AlbumColumn.ID.columnName() +
           " INNER JOIN " + TABLE_ARTISTS + " ON " + TABLE_ALBUMS + "." + AlbumColumn.ARTIST + " = " +
@@ -122,21 +166,32 @@ public class Datasource {
           TABLE_ALBUMS + "." + AlbumColumn.NAME.columnName() + ", " +
           TABLE_SONGS + "." + SongsColumn.TRACK.columnName();
 
+  public static final String QUERY_VIEW_SONG_INFO_PREP = "SELECT " + SongArtistColumn.ARTIST_NAME.columnName() + ", " +
+          SongArtistColumn.ALBUM_NAME.columnName() + ", " +
+          SongArtistColumn.SONG_TRACK.columnName() + " FROM " + TABLE_ARTIST_SONG_VIEW +
+          " WHERE " + SongArtistColumn.SONG_TITLE.columnName() + " = ?";
   private Connection connection;
+  private PreparedStatement querySongInfoView;
 
   // METHODS
-  public  boolean open() {
+  public boolean open() {
     try {
       connection = DriverManager.getConnection(CONNECTION_STRING);
+      querySongInfoView = connection.prepareStatement(QUERY_VIEW_SONG_INFO_PREP);
       return true;
-    } catch(SQLException error) {
+    } catch (SQLException error) {
       System.out.println("Couldn't connect to database: " + error.getMessage());
       return false;
     }
   }
 
-  public void  close() {
+  public void close() {
     try {
+      // It's important to close prepare query before closing connection.
+      // When prepared query is closed the results sets also closed
+      if (querySongInfoView != null) {
+        querySongInfoView.close();
+      }
       if (connection != null) {
         connection.close();
       }
@@ -146,8 +201,8 @@ public class Datasource {
   }
 
   public List<Artist> queryArtists() {
-    try(Statement statement = connection.createStatement();
-      ResultSet results = statement.executeQuery("SELECT * FROM " + TABLE_ARTISTS)
+    try (Statement statement = connection.createStatement();
+         ResultSet results = statement.executeQuery("SELECT * FROM " + TABLE_ARTISTS)
     ) {
       List<Artist> artists = new ArrayList<>();
       while (results.next()) {
@@ -157,7 +212,7 @@ public class Datasource {
         );
         artists.add(artist);
       }
-      return  artists;
+      return artists;
     } catch (SQLException error) {
       System.out.println("Query failed: " + error.getMessage());
       return null;
@@ -174,8 +229,8 @@ public class Datasource {
       stringBuilder.append(sortOrder.value());
     }
 
-    try(Statement statement = connection.createStatement();
-        ResultSet results = statement.executeQuery(stringBuilder.toString())
+    try (Statement statement = connection.createStatement();
+         ResultSet results = statement.executeQuery(stringBuilder.toString())
     ) {
       List<Album> albums = new ArrayList<>();
       while (results.next()) {
@@ -186,7 +241,7 @@ public class Datasource {
         );
         albums.add(album);
       }
-      return  albums;
+      return albums;
     } catch (SQLException error) {
       System.out.println("Query failed: " + error.getMessage());
       return null;
@@ -237,18 +292,18 @@ public class Datasource {
     try (Statement statement = connection.createStatement();
          ResultSet results = statement.executeQuery(stringBuilder.toString())
     ) {
-       List<String> albumsNames = new ArrayList<>();
-       while (results.next()) {
-         albumsNames.add(results.getString("albumName"));
-       }
-       return albumsNames;
+      List<String> albumsNames = new ArrayList<>();
+      while (results.next()) {
+        albumsNames.add(results.getString("albumName"));
+      }
+      return albumsNames;
     } catch (SQLException error) {
       System.out.println("Query queryAlbumsForArtist failed: " + error.getMessage());
       return null;
     }
   }
 
-  public  List<SongArtist> queryArtistsForSong(String songName, SortOrder sortOrder) {
+  public List<SongArtist> queryArtistsForSong(String songName, SortOrder sortOrder) {
 //  SELECT artists.name, albums.name, songs.track FROM songs
 //  INNER JOIN albums ON songs.album = albums._id
 //  INNER JOIN artists ON albums.artist = artists._id
@@ -278,7 +333,7 @@ public class Datasource {
                 results.getString(SongArtistColumn.ARTIST_NAME.columnIndex()),
                 results.getString(SongArtistColumn.ALBUM_NAME.columnIndex()),
                 results.getInt(SongArtistColumn.SONG_TRACK.columnIndex())
-                );
+        );
         songsArtists.add(songArtist);
       }
 
@@ -289,7 +344,7 @@ public class Datasource {
     }
   }
 
-  public  void  querySongsMetadata() {
+  public void querySongsMetadata() {
     String sql = "SELECT * FROM " + TABLE_SONGS;
 
     try (Statement statement = connection.createStatement();
@@ -329,25 +384,44 @@ public class Datasource {
   }
 
   public List<SongArtist> queryViewSongInfo(String songTitle) {
-    String artistName = "artistName";
-    String albumName = "albumName";
-    String trackNumber = "trackNumber";
-    String sql = "SELECT " + ArtistColumn.NAME.columnName() + " AS " + artistName + ", " +
-            SongsColumn.ALBUM.columnName() + " AS " + albumName + ", " +
-            SongsColumn.TRACK.columnName() + " AS " + trackNumber + " FROM " + TABLE_ARTIST_SONG_VIEW +
-            " WHERE " + SongsColumn.TITLE.columnName() + " = " + " '" + songTitle + "'";
+    // Implementation with vulnerability
+    /*
+    String justSql = "SELECT " + SongArtistColumn.ARTIST_NAME.columnName() + ", " +
+            SongArtistColumn.ALBUM_NAME.columnName() + ", " +
+            SongArtistColumn.SONG_TRACK.columnName() + " FROM " + TABLE_ARTIST_SONG_VIEW +
+            " WHERE " + SongArtistColumn.SONG_TITLE.columnName() + " = " + " '" + songTitle + "'";
+
     List<SongArtist> songArtists = new ArrayList<>();
     try (Statement statement = connection.createStatement()) {
-      ResultSet results = statement.executeQuery(sql);
+      ResultSet results = statement.executeQuery(justSql);
       while (results.next()) {
         SongArtist songArtist = new SongArtist(
-                results.getString(artistName),
-                results.getString(albumName),
-                results.getInt(trackNumber)
+                results.getString(SongArtistColumn.ARTIST_NAME.columnIndex()),
+                results.getString(SongArtistColumn.ALBUM_NAME.columnIndex()),
+                results.getInt(SongArtistColumn.SONG_TRACK.columnIndex())
         );
         songArtists.add(songArtist);
       }
-      return  songArtists;
+      return songArtists;
+    } catch (SQLException error) {
+      System.out.println("Query queryViewSongInfo failed: " + error.getMessage());
+      return null;
+    }
+     */
+
+    try {
+      querySongInfoView.setString(1, songTitle);
+      ResultSet results = querySongInfoView.executeQuery();
+      List<SongArtist> songArtists = new ArrayList<>();
+      while (results.next()) {
+        SongArtist songArtist = new SongArtist(
+                results.getString(SongArtistColumn.ARTIST_NAME.columnIndex()),
+                results.getString(SongArtistColumn.ALBUM_NAME.columnIndex()),
+                results.getInt(SongArtistColumn.SONG_TRACK.columnIndex())
+        );
+        songArtists.add(songArtist);
+      }
+      return songArtists;
     } catch (SQLException error) {
       System.out.println("Query queryViewSongInfo failed: " + error.getMessage());
       return null;
