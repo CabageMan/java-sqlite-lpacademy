@@ -5,6 +5,7 @@ import com.ironhead.model.Artist;
 import com.ironhead.model.Datasource;
 import com.ironhead.model.SongArtist;
 
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Scanner;
 
@@ -24,7 +25,7 @@ public class Main {
       return;
     }
 
-    for (Artist artist: artists) {
+    for (Artist artist : artists) {
       System.out.println("Artist ID: " + artist.getId() + ", Artist Name: " + artist.getName());
     }
 
@@ -37,8 +38,8 @@ public class Main {
       return;
     }
 
-    for (Album album: albums) {
-      System.out.println( "Album ID: " + album.getId() +
+    for (Album album : albums) {
+      System.out.println("Album ID: " + album.getId() +
               ", Album Name: " + album.getName() +
               ", Album Artist: " + album.getArtistId());
     }
@@ -84,9 +85,10 @@ public class Main {
     printDivider();
 
     // Checking for SQL injection.
-    Scanner scanner = new Scanner(System.in);
-    System.out.println("Enter a song title: ");
-    String title = scanner.nextLine();
+//    Scanner scanner = new Scanner(System.in);
+//    System.out.println("Enter a song title: ");
+//    String title = scanner.nextLine();
+    String title = "Go Your Own Way";
 
     List<SongArtist> viewSongInfo = datasource.queryViewSongInfo(title);
     if (viewSongInfo == null) {
@@ -101,6 +103,14 @@ public class Main {
               "Album Name: " + songArtist.getAlbumName() + " | " +
               "Song Track: " + songArtist.getSongTrack()
       );
+    }
+
+    printDivider();
+
+    try {
+      datasource.insertSong("Stalingrad", "Sabaton", "Primo Victoria", 6);
+    } catch (SQLException exception) {
+      System.out.println("Could not add the song: " + exception);
     }
 
     datasource.close();
