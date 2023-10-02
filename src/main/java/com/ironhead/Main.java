@@ -108,7 +108,7 @@ public class Main {
     printDivider();
 
     try {
-      datasource.insertSong("Stalingrad", "Sabaton", "Primo Victoria", 6);
+      datasource.insertSong("Like A Rolling Stone", "Bob Dylan", "Bob Dylan's Greatest Hits", 5);
     } catch (SQLException exception) {
       System.out.println("Could not add the song: " + exception);
     }

@@ -525,7 +525,7 @@ public class Datasource {
       System.out.println("Try to insert song Track: " + track + " Title: " + title + "Album ID: " + albumId);
       insertIntoSongs.setInt(1, track);
       insertIntoSongs.setString(2, title);
-      insertIntoSongs.setInt(3, albumId);
+      insertIntoSongs.setInt(8, albumId);
 
       int affectedRows = insertIntoSongs.executeUpdate();
       if (affectedRows == 1) {
@@ -533,7 +533,7 @@ public class Datasource {
       } else {
         throw new SQLException("Song insertions failure.");
       }
-    } catch (SQLException insertException) {
+    } catch (Exception insertException) { // It's important to use Exception here, since the only SQLException doesn't call on other different exception.
       System.out.println("Insert song exception: " + insertException.getMessage());
       try {
         connection.rollback();
